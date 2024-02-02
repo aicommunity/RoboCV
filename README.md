@@ -32,32 +32,40 @@ $ pip install --user -r requirements.txt
 ```		
 ```sh
 $ echo "export CARLA_ROOT=/opt/carla-simulator" >> ~/.bashrc
-# Корневая папка Carla Simulator
-		
+# Корневая папка Carla Simulator	
 ```	
 ```sh
 $ echo "export PYTHONPATH=$PYTHONPATH:$CARLA_ROOT/PythonAPI/carla/dist/(*ВСТАВИТЬ ИМЯ ФАЙЛА*):$CARLA_ROOT/PythonAPI/carla" >> ~/.bashrc
-# Путь внутри корневой папки Carla Simulator. Пример файла: сarla-0.9.13-py3.7-linux-x86_64.egg
-		
+# Путь внутри корневой папки Carla Simulator. Пример файла: сarla-0.9.13-py3.7-linux-x86_64.egg	
 ```	
 ```sh
 $ echo "export SCENARIO_RUNNER_PATH=*ПУТЬ ДО ПАПКИ С РЕПОЗИТОРИЕМ*/RoboCV/scenario_runner-0.9.13" >> ~/.bashrc
-# Вставить путь до папки
-		
+# Вставить путь до папки	
 ```	
 ```sh
 $ rosdep update
 $ rosdep install --from-paths src --ignore-src -r
-# При нахождении в папке car_ws репозитория и при настроенной среде ROS2 (source /opt/ros/foxy/setup.bash)
-		
+# При нахождении в папке car_ws репозитория и при настроенной среде ROS2 (source /opt/ros/foxy/setup.bash)	
 ```	
 
 ## Использование
 Для сборки всех пакетов, при нахождении в директории car_ws, выполнить команду:
 ```sh
-$ colcone build
-		
-```	
+$ colcone build	
+```
+После успншной сборки выполнить команду
+```sh
+$ source install/setup.bash
+```
+
+Для тестирования успешной установки, в отдельном терминале запустить Carla Simulator командой:
+```sh
+$ /opt/carla-simulator/CarlaUE4.sh -prefernvidia -RenderOffScreen
+```
+Затем, в первом терминале выполнить команду:
+```sh
+$ ros2 launch sim_bringup sim_start_without_traffic.launch.py
+```
 
 ## Примечание
 При возникновении ошибок при билде, смотрим сообщения в терминале и фиксим. Вероятнее всего, не хватает какого либо модуля, которой позднее будет добавлен в requirements.
