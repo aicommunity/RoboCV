@@ -1,3 +1,0 @@
-[submodule "car_ws/src/ros-bridge"]
-	path = car_ws/src/ros-bridge
-	url = git@github.com:carla-simulator/ros-bridge.git
