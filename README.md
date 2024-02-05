@@ -55,7 +55,7 @@ rosdep install --from-paths src --ignore-src -r
 ## Использование
 Для сборки всех пакетов, при нахождении в директории car_ws, выполнить команду:
 ```sh
-$ colcone build	
+$ colcon build	
 ```
 После успншной сборки выполнить команду
 ```sh
