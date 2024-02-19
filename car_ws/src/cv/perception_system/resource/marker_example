@@ -1,0 +1,54 @@
+visualization_msgs.msg.Marker(
+    header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=5, nanosec=375770183), frame_id='map'),
+     ns='Buildings', 
+     id=8, 
+     type=1, 
+     action=0, 
+     pose=geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=103.54055786132812, y=-244.3751678466797, z=2.421743631362915),
+     orientation=geometry_msgs.msg.Quaternion(x=-0.14708888893746194, y=0.14338264480738677, z=-0.7008001360511883, w=0.6831437954265689)),
+     scale=geometry_msgs.msg.Vector3(x=4.46694278717041, y=1.9456348419189453, z=1.773422360420227), 
+     color=std_msgs.msg.ColorRGBA(r=0.27450981736183167, g=0.27450981736183167, b=0.27450981736183167, a=0.800000011920929), 
+     lifetime=builtin_interfaces.msg.Duration(sec=0, nanosec=0), 
+     frame_locked=False, 
+     points=[], 
+     colors=[], 
+     text='', 
+     mesh_resource='', 
+     mesh_use_embedded_materials=False
+     )
+
+
+
+[['', ''], 
+ ['Buildings', geometry_msgs.msg.Vector3(x=2.175373077392578, y=1.1280786991119385, z=1.3405174016952515)], 
+ ['Fences', geometry_msgs.msg.Vector3(x=1.447757363319397, y=0.12344712018966675, z=1.2446913719177246)], 
+ ['Poles', geometry_msgs.msg.Vector3(x=1.3870614767074585, y=0.4822918474674225, z=4.465848445892334)], 
+ ['RoadLines', geometry_msgs.msg.Vector3(x=41.22718048095703, y=20.884984970092773, z=0.1)], 
+ ['Roads', geometry_msgs.msg.Vector3(x=1.0218764543533325, y=1.0739802122116089, z=0.1)], 
+ ['Sidewalks', geometry_msgs.msg.Vector3(x=0.19999998807907104, y=8.78125, z=0.19999998807907104)], 
+ ['Vegetation', geometry_msgs.msg.Vector3(x=2.840651512145996, y=2.9330077171325684, z=2.3298938274383545)], 
+ ['Walls', geometry_msgs.msg.Vector3(x=7.194197177886963, y=0.2794509828090668, z=6.513875484466553)], 
+ ['TrafficSigns', geometry_msgs.msg.Vector3(x=0.6821317672729492, y=0.1, z=0.6821319460868835)], 
+ ['Bridge', geometry_msgs.msg.Vector3(x=8.818078994750977, y=16.926494598388672, z=21.179872512817383)], 
+ ['GuardRail', geometry_msgs.msg.Vector3(x=15.968501091003418, y=14.944140434265137, z=0.7651141285896301)], 
+ ['TrafficLight', geometry_msgs.msg.Vector3(x=0.2771679759025574, y=0.45076659321784973, z=1.221373438835144)]]
+
+
+# qos_policy = QoSProfile(
+        #     reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        #     history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        #     durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+        #     depth=1)
+        #  qos_profile=qos_policy
+
+
+def listener_callback(self, msg):
+        nslist = [['','']]
+        pos = 0
+
+        for marker in msg.markers:
+            if nslist[pos][0] != marker.ns:
+                pos += 1
+                nslist.append([marker.ns, marker.scale])
+            # print(str(marker.id) + "  " + str(marker.ns) + "  " + str(marker.scale) + "\n")  # массив с маркерами 
+        print(nslist)

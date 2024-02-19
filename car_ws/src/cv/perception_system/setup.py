@@ -21,6 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'fake_detector = perception_system.fake_detector:main',
+            'fake_localization = perception_system.fake_localization:main',
+            'vizualization = perception_system.vizualization:main',
         ],
     },
 )
