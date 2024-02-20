@@ -104,26 +104,17 @@ class FakeDetector(Node):
         
     def listener_callback(self, msg):
         self.class_list = ClassList()
+        self.class_list.header = msg.header
 
         cv_img = self.cv_bridge.imgmsg_to_cv2(msg, 'bgra8')
         self.hsv_img = cv.cvtColor(cv_img, cv.COLOR_BGR2HSV)
-        height, width, _ = self.hsv_img.shape
-
-        # for h in range(height):
-        #     for w in range(width):
-        #         print(self.hsv_img[h][w])
 
         self.hsv_img, single_class_list = self.lights.process(self.hsv_img)
         self.class_list.class_objs.append(single_class_list)
 
         self.hsv_img, single_class_list = self.signs.process(self.hsv_img)
+        self.class_list.class_objs.append(single_class_list)
 
-
-
-        # up_points = (width*3, height*3)
-        # resized = cv.resize(self.hsv_img, up_points, interpolation= cv.INTER_LINEAR)
-        # cv.imshow("res", resized)
-        # cv.waitKey(1)
         self.publisher_.publish(self.class_list)
 
     

@@ -1,8 +1,11 @@
 import rclpy
 import colorsys
 import cv2 as cv
+import numpy as np
 from cv_bridge import CvBridge
+from message_filters import TimeSynchronizer, Subscriber
 from rclpy.node import Node
+from math import pi, cos, sin
 
 from sensor_msgs.msg import CameraInfo, Image
 from cv_msg.msg import Object, ObjectList, ClassList
@@ -12,61 +15,72 @@ class Vizualization(Node):
 
     def __init__(self):
         super().__init__('vizualization')
-        self.sub_img = self.create_subscription(
-            Image,
-            '/carla/ego_vehicle/semantic_segmentation_front/image',
-            self.img_callback,
-            10)
-        
-        self.sub_res = self.create_subscription(
-            ClassList,
-            '/detector_out',
-            self.res_callback,
-            10)
+
+        self.sub_img = Subscriber(self, Image, "/carla/ego_vehicle/semantic_segmentation_front/image")
+        self.sub_res = Subscriber(self, ClassList, "/localization_out")
+
+        self.tss = TimeSynchronizer([self.sub_img, self.sub_res], 10)
+        self.tss.registerCallback(self.img_callback)
         
         self.cv_bridge = CvBridge()
-        self.hsv_img = ''
-        self.is_res = 0 
         self.res_msg = ClassList()
-            
-    # def listener_callback2(self, msg):
-    #     self.class_list = ClassList()
 
-    #     cv_img = self.cv_bridge.imgmsg_to_cv2(msg, 'bgra8')
-    #     self.hsv_img = cv.cvtColor(cv_img, cv.COLOR_BGR2HSV)
-    #     height, width, _ = self.hsv_img.shape
+        self.hsv_img = ''
 
-    #     # for h in range(height):
-    #     #     for w in range(width):
-    #     #         print(self.hsv_img[h][w])
+        self.focal_length = 200  # in px
+        self.cam_h = 70
+        self.cam_w = 400
+        self.cam_fov = pi/2
 
-    #     self.hsv_img, single_class_list = self.lights.process(self.hsv_img)
-    #     self.class_list.class_objs.append(single_class_list)
+        self.te = 0
+        self.st = 0
+    
+    def draw_map(self, angle, dist):
+        dist_scale = 10
+        angle_scale = 1
 
-    #     self.hsv_img, single_class_list = self.signs.process(self.hsv_img)
-    #     # self.c
-    #     # lass_list.class_objs.append(single_class_list)
+        x = int(round(sin(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
+        y = int(round(cos(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
+        cv.circle(self.map, (x,y), 2, (0,0,255), -1)
+        print(x,y)
+
     def res_parsing(self):
-        if self.is_res:
-            counter = 0
-            classes = self.res_msg
-            for cls in classes.class_objs: # Для каждого класса объектов в листе классов
-                for obj in cls.objects:  # Для каждого объекта в листе объектов одного класса
-                    x = obj.img_x
-                    y = obj.img_y
-                    w = obj.img_w
-                    h = obj.img_h
+        counter = 0
+        classes = self.res_msg
+        for cls in classes.class_objs: # Для каждого класса объектов в листе классов
+            for obj in cls.objects:  # Для каждого объекта в листе объектов одного класса
+                (b ,g, r) = (11*cls.id, 11*cls.id, 11*cls.id)
+                x = obj.img_x
+                y = obj.img_y
+                w = obj.img_w
+                h = obj.img_h
 
-                    cv.rectangle(self.hsv_img, (x, y), (x + w, y + h), (11*cls.id, 11*cls.id, 11*cls.id), 1)
-                    cv.putText(self.hsv_img, str(cls.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
-                    counter += 1
-            self.is_res = 0 
+                dist = obj.dist
+                angle = obj.angle
+
+                cv.rectangle(self.hsv_img, (x, y), (x + w, y + h), (b, g, r), 1)
+                cv.putText(self.hsv_img, str(cls.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
+
+                (x1_l, y1_l) = (int(self.cam_w/2), self.cam_h)
+                (x2_l, y2_l) = (int(x+w//2), int(y+h//2))
+                cv.line(self.hsv_img, (x1_l,y1_l), (x2_l,y2_l), (b, g, r), 1)
+
+                self.draw_map(angle, dist)
+                
+                counter += 1
 
 
         
 
-    def img_callback(self, msg):
-        cv_img = self.cv_bridge.imgmsg_to_cv2(msg, 'bgra8')
+    def img_callback(self, img, res):
+        self.map = np.zeros((512,512,3), np.uint8)
+        cv.circle(self.map,(256,256), 256, (0,0,255), 1)
+        cv.rectangle(self.map,(246,236),(266,276),(0,255,0),2)
+        cv.line(self.map, (256, 256), (0,0), (0,255,0), 2)
+        cv.line(self.map, (256, 256), (512, 0), (0,255,0), 2)
+
+        self.res_msg = res
+        cv_img = self.cv_bridge.imgmsg_to_cv2(img, 'bgra8')
         self.hsv_img = cv.cvtColor(cv_img, cv.COLOR_BGR2HSV)
 
         self.res_parsing()
@@ -74,13 +88,10 @@ class Vizualization(Node):
         resize_points = (width*2, height*2)
         resized = cv.resize(self.hsv_img, resize_points, interpolation= cv.INTER_LINEAR)
 
+        cv.imshow('radar', self.map)
         cv.imshow("res", resized)
         cv.waitKey(1)
         
-
-    def res_callback(self, msg):
-        self.is_res = 1
-        self.res_msg = msg  
 
         
 

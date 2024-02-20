@@ -42,14 +42,14 @@ class FakeLocalization(Node):
         #     durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
         #     depth=1)
         #  qos_profile=qos_policy
-
+        self.publisher = self.create_publisher(ClassList, 'localization_out', 10)
         self.subscription = self.create_subscription(
             ClassList,
             '/detector_out',
             self.listener_callback,
             10)
         
-        self.focal_length = 200  # in mm i guess
+        self.focal_length = 200  # in px
         self.cam_h = 70
         self.cam_w = 400
         self.cam_fov = pi/2
@@ -75,9 +75,10 @@ class FakeLocalization(Node):
                     self.object_img_width = obj.img_w
                     
                     dist_normal = self.calculate_dist()
-                    angle = self.calculate_angle()
-                    dist = dist_normal / cos(angle)
-                    print("Dist: " + str(dist) + "Angle: " + str(angle))
+                    obj.angle = self.calculate_angle()
+                    obj.dist = dist_normal / cos(obj.angle)
+                    # print("Dist: " + str(obj.dist) + "Angle: " + str(obj.angle))
+        self.publisher.publish(classes)
 
     
 def main(args=None):
