@@ -17,7 +17,7 @@ class Vizualization(Node):
         super().__init__('vizualization')
 
         self.sub_img = Subscriber(self, Image, "/carla/ego_vehicle/semantic_segmentation_front/image")
-        self.sub_res = Subscriber(self, ClassList, "/localization_out")
+        self.sub_res = Subscriber(self, ClassList, "/tracker_out")
 
         self.tss = TimeSynchronizer([self.sub_img, self.sub_res], 10)
         self.tss.registerCallback(self.img_callback)
@@ -35,13 +35,13 @@ class Vizualization(Node):
         self.te = 0
         self.st = 0
     
-    def draw_map(self, angle, dist):
-        dist_scale = 10
+    def draw_map(self, angle, dist, color):
+        dist_scale = 5
         angle_scale = 1
 
         x = int(round(sin(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
         y = int(round(cos(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
-        cv.circle(self.map, (x,y), 2, (0,0,255), -1)
+        cv.circle(self.map, (x,y), 2, color, -1)
         print(x,y)
 
     def res_parsing(self):
@@ -59,13 +59,13 @@ class Vizualization(Node):
                 angle = obj.angle
 
                 cv.rectangle(self.hsv_img, (x, y), (x + w, y + h), (b, g, r), 1)
-                cv.putText(self.hsv_img, str(cls.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
+                cv.putText(self.hsv_img, str(cls.id) + " " + str(obj.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
 
                 (x1_l, y1_l) = (int(self.cam_w/2), self.cam_h)
                 (x2_l, y2_l) = (int(x+w//2), int(y+h//2))
                 cv.line(self.hsv_img, (x1_l,y1_l), (x2_l,y2_l), (b, g, r), 1)
 
-                self.draw_map(angle, dist)
+                self.draw_map(angle, dist, (b, g, r))
                 
                 counter += 1
 

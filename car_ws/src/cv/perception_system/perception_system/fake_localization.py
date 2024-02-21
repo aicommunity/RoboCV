@@ -16,15 +16,15 @@ size_dict = {  # Meters i guess, w, h
                         7: (0, 0),
                         8: (0, 0),
                         9: (0, 0),
-                        10: (0, 0),
+                        10: (0, 2.000),  # Vehicles, Works
                         11: (0, 0),
-                        12: (0, 0),  # TrafficSigns, 
+                        12: (0, 0.682),  # TrafficSigns, 
                         13: (0, 0),
                         14: (0, 0),
                         15: (0, 0),
                         16: (0, 0),
                         17: (0, 0),
-                        18: (0.277, 0),  # TrafficLights, Works
+                        18: (0.277, 1.221),  # TrafficLights, Works
                         19: (0, 0),
                         20: (0, 0),
                         21: (0, 0),
@@ -56,8 +56,8 @@ class FakeLocalization(Node):
 
 
     def calculate_dist(self):
-        dist_normal = (self.focal_length * self.object_width) / self.object_img_width
-        return dist_normal
+        dist = (self.focal_length * self.object_height) / self.object_img_height
+        return dist
 
     def calculate_angle(self):
         rad_per_pixel = self.cam_fov / self.cam_w
@@ -69,14 +69,15 @@ class FakeLocalization(Node):
     def listener_callback(self, msg):
         classes = msg
         for cls in classes.class_objs: # Для каждого класса объектов в листе классов
-                self.object_width = size_dict[cls.id][0]
+                self.object_height = size_dict[cls.id][1]
                 for obj in cls.objects:  # Для каждого объекта в листе объектов одного класса
+                    self.object_img_height = obj.img_h
                     self.object_img_x_pos = obj.img_x
                     self.object_img_width = obj.img_w
                     
-                    dist_normal = self.calculate_dist()
+                    obj.dist = self.calculate_dist()
                     obj.angle = self.calculate_angle()
-                    obj.dist = dist_normal / cos(obj.angle)
+                    # obj.dist = dist_normal / cos(obj.angle)
                     # print("Dist: " + str(obj.dist) + "Angle: " + str(obj.angle))
         self.publisher.publish(classes)
 

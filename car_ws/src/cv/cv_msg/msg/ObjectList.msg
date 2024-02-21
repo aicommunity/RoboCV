@@ -1,4 +1,4 @@
 string tag
-int8 id  # detector
+int8 id
 
 Object[] objects

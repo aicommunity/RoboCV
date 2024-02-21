@@ -78,7 +78,7 @@ def generate_launch_description():
         ),
         launch.actions.DeclareLaunchArgument(
             name='avoid_risk',
-            default_value='False'
+            default_value='True'
         ),
         launch.actions.DeclareLaunchArgument(
             name='sigterm_timeout',

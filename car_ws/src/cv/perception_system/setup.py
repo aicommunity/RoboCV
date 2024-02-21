@@ -23,6 +23,8 @@ setup(
             'fake_detector = perception_system.fake_detector:main',
             'fake_localization = perception_system.fake_localization:main',
             'vizualization = perception_system.vizualization:main',
+            'fake_tracker = perception_system.fake_tracker:main',
+
         ],
     },
 )
