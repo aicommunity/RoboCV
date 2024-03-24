@@ -42,7 +42,6 @@ class Vizualization(Node):
         x = int(round(sin(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
         y = int(round(cos(angle_scale*angle+pi), 2)*dist*dist_scale + 256)
         cv.circle(self.map, (x,y), 2, color, -1)
-        print(x,y)
 
     def res_parsing(self):
         counter = 0
@@ -59,7 +58,7 @@ class Vizualization(Node):
                 angle = obj.angle
 
                 cv.rectangle(self.hsv_img, (x, y), (x + w, y + h), (b, g, r), 1)
-                cv.putText(self.hsv_img, str(cls.id) + " " + str(obj.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
+                cv.putText(self.hsv_img, str(cls.id) + " id: " + str(obj.id), (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
 
                 (x1_l, y1_l) = (int(self.cam_w/2), self.cam_h)
                 (x2_l, y2_l) = (int(x+w//2), int(y+h//2))
@@ -74,10 +73,16 @@ class Vizualization(Node):
 
     def img_callback(self, img, res):
         self.map = np.zeros((512,512,3), np.uint8)
-        cv.circle(self.map,(256,256), 256, (0,0,255), 1)
+        # cv.circle(self.map,(256,256), 256, (0,0,255), 1)
         cv.rectangle(self.map,(246,236),(266,276),(0,255,0),2)
         cv.line(self.map, (256, 256), (0,0), (0,255,0), 2)
         cv.line(self.map, (256, 256), (512, 0), (0,255,0), 2)
+
+        cv.circle(self.map,(256,256), 125, (0,0,255), 1)  # 25m scale dist = 5
+        cv.circle(self.map,(256,256), 250, (0,0,255), 1)  # 50m
+        cv.putText(self.map, "25m", (300, 256), cv.FONT_HERSHEY_SIMPLEX, 1, (36,255,12), 1)
+        cv.putText(self.map, "50m", (425, 256), cv.FONT_HERSHEY_SIMPLEX, 1, (36,255,12), 1)
+
 
         self.res_msg = res
         cv_img = self.cv_bridge.imgmsg_to_cv2(img, 'bgra8')

@@ -64,7 +64,6 @@ class FakeTracker(Node):
 
             if abs(cur_x - prev_x) < 20 and abs(cur_y - prev_y) < 5: #####################################
                  obj.id = prev_obj.id
-                 print("Трекинг заебсиь")
                  return obj   
 
         while new_id in used_id:
@@ -72,7 +71,6 @@ class FakeTracker(Node):
     
         obj.id = new_id
         self.new_id_pointer += 1
-        print("Трекинг хуета")
         return obj
             
          
@@ -88,7 +86,7 @@ class FakeTracker(Node):
             self.class_dict[cls.id] = cls.objects
         
         self.prev_dict = self.class_dict
-        print(self.prev_dict)
+        # print(self.prev_dict)
         self.publisher.publish(classes)
 
     

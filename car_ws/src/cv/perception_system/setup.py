@@ -24,7 +24,8 @@ setup(
             'fake_localization = perception_system.fake_localization:main',
             'vizualization = perception_system.vizualization:main',
             'fake_tracker = perception_system.fake_tracker:main',
-
+            'fake_lidar = perception_system.fake_lidar:main',
+            'lidar_filter = perception_system.lidar_filter:main'
         ],
     },
 )

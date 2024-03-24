@@ -55,7 +55,7 @@ class FakeLocalization(Node):
         self.cam_fov = pi/2
 
 
-    def calculate_dist(self):
+    def calculate_dist(self):  # проверить
         dist = (self.focal_length * self.object_height) / self.object_img_height
         return dist
 
@@ -77,8 +77,6 @@ class FakeLocalization(Node):
                     
                     obj.dist = self.calculate_dist()
                     obj.angle = self.calculate_angle()
-                    # obj.dist = dist_normal / cos(obj.angle)
-                    # print("Dist: " + str(obj.dist) + "Angle: " + str(obj.angle))
         self.publisher.publish(classes)
 
     
