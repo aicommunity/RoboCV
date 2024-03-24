@@ -1,11 +1,11 @@
 import rclpy
-from math import cos, pi
+from math import pi
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
-from visualization_msgs.msg import MarkerArray
-from cv_msg.msg import Object, ObjectList, ClassList
+from ..config import config
 
-size_dict = {  # Meters i guess, w, h
+from cv_msg.msg import ClassList
+
+size_dict = {  # Метры, w,h. Словарь с рамзерами объектов. Заполнядся вручную из списка маркеров объектов
                         0: (0, 0),
                         1: (0, 0),  # Buildings, Works
                         2: (0, 0),
@@ -31,17 +31,11 @@ size_dict = {  # Meters i guess, w, h
                         22: (0, 0)
                         }
 
-class FakeLocalization(Node):
+
+class FakeLocalization(Node):  # Класс локализации объектов. Работает по колбэку.
 
     def __init__(self):
         super().__init__('fake_localization')
-
-        # qos_policy = QoSProfile(
-        #     reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
-        #     history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-        #     durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
-        #     depth=1)
-        #  qos_profile=qos_policy
         self.publisher = self.create_publisher(ClassList, 'localization_out', 10)
         self.subscription = self.create_subscription(
             ClassList,
@@ -49,20 +43,18 @@ class FakeLocalization(Node):
             self.listener_callback,
             10)
         
-        self.focal_length = 200  # in px
-        self.cam_h = 70
-        self.cam_w = 400
-        self.cam_fov = pi/2
+        self.focal_length = config.cam_focal_length
+        self.cam_h = config.cam_height
+        self.cam_w = config.cam_width
+        self.cam_fov = config.cam_fov
 
-
-    def calculate_dist(self):  # проверить
+    def calculate_dist(self):  # Вычисление расстояния
         dist = (self.focal_length * self.object_height) / self.object_img_height
         return dist
 
-    def calculate_angle(self):
+    def calculate_angle(self):  # Вычисление угла
         rad_per_pixel = self.cam_fov / self.cam_w
         obj_center = self.object_img_x_pos + self.object_img_width/2
-
         angle = -(obj_center - self.cam_w/2) * rad_per_pixel
         return angle
         
@@ -77,6 +69,9 @@ class FakeLocalization(Node):
                     
                     obj.dist = self.calculate_dist()
                     obj.angle = self.calculate_angle()
+
+                    if config.global_debug or config.localization_debug:
+                        print(classes)
         self.publisher.publish(classes)
 
     

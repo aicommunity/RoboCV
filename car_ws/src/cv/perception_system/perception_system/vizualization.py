@@ -1,14 +1,14 @@
 import rclpy
-import colorsys
 import cv2 as cv
 import numpy as np
 from cv_bridge import CvBridge
 from message_filters import TimeSynchronizer, Subscriber
 from rclpy.node import Node
 from math import pi, cos, sin
+from ..config import config
 
-from sensor_msgs.msg import CameraInfo, Image
-from cv_msg.msg import Object, ObjectList, ClassList
+from sensor_msgs.msg import Image
+from cv_msg.msg import ClassList
 
 
 class Vizualization(Node):
@@ -17,7 +17,7 @@ class Vizualization(Node):
         super().__init__('vizualization')
 
         self.sub_img = Subscriber(self, Image, "/carla/ego_vehicle/semantic_segmentation_front/image")
-        self.sub_res = Subscriber(self, ClassList, "/tracker_out")
+        self.sub_res = Subscriber(self, ClassList, config.viz_topic)
 
         self.tss = TimeSynchronizer([self.sub_img, self.sub_res], 10)
         self.tss.registerCallback(self.img_callback)
@@ -27,13 +27,10 @@ class Vizualization(Node):
 
         self.hsv_img = ''
 
-        self.focal_length = 200  # in px
-        self.cam_h = 70
-        self.cam_w = 400
-        self.cam_fov = pi/2
-
-        self.te = 0
-        self.st = 0
+        self.focal_length = config.cam_focal_length
+        self.cam_h = config.cam_height
+        self.cam_w = config.cam_width
+        self.cam_fov = config.cam_fov
     
     def draw_map(self, angle, dist, color):
         dist_scale = 5
@@ -68,12 +65,8 @@ class Vizualization(Node):
                 
                 counter += 1
 
-
-        
-
     def img_callback(self, img, res):
         self.map = np.zeros((512,512,3), np.uint8)
-        # cv.circle(self.map,(256,256), 256, (0,0,255), 1)
         cv.rectangle(self.map,(246,236),(266,276),(0,255,0),2)
         cv.line(self.map, (256, 256), (0,0), (0,255,0), 2)
         cv.line(self.map, (256, 256), (512, 0), (0,255,0), 2)
@@ -97,10 +90,6 @@ class Vizualization(Node):
         cv.imshow("res", resized)
         cv.waitKey(1)
         
-
-        
-
-    
 
 def main(args=None):
     rclpy.init(args=args)
